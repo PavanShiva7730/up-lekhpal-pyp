@@ -86,8 +86,6 @@ On mobile, pie chart shows <b>Top topics + Others</b>.
 
 <select id="paperSelect" onchange="updateChart()">
 
-<option value="total">Combined Total</option>
-
 <option value="2022">UP Lekhpal Mains 2022</option>
 
 <option value="2015_1">UPSSSC Lekhpal 2015 Shift 1</option>
@@ -143,8 +141,6 @@ const subjects=[
 
 const paperNames={
 
-"total":"Combined Total",
-
 "2022":"UP Lekhpal Mains 2022",
 
 "2015_1":"UPSSSC Lekhpal 2015 Shift 1",
@@ -161,9 +157,7 @@ const dataSet={
 
 "2015_1":[3,0,1,0,40,4,1,1,25,25],
 
-"2015_2":[12,0,4,0,29,4,0,1,25,25],
-
-"total":[23,1,21,5,94,8,1,2,70,75]
+"2015_2":[12,0,4,0,29,4,0,1,25,25]
 
 };
 
@@ -237,7 +231,7 @@ chart.destroy();
 }
 
 
-// Update Title
+// Title
 
 
 document.getElementById("chartTitle").innerHTML=
@@ -337,13 +331,13 @@ let data=dataSet[paper];
 let labels=subjects;
 
 
-// Calculate Total
+// Total Questions
 
 
 let total=data.reduce((a,b)=>a+b,0);
 
 
-// Pie Mobile Optimization
+// Pie Optimization
 
 
 if(type=="pie"){
@@ -372,4 +366,5 @@ updateChart();
 
 </body>
 </html>
+
 
