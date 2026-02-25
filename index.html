@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>UP Lekhpal Paper-wise Topic Weightage</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f6f8fb;
+margin:0;
+}
+
+.section{
+
+max-width:950px;
+margin:auto;
+padding:25px;
+background:white;
+margin-top:20px;
+border-radius:12px;
+box-shadow:0px 3px 12px rgba(0,0,0,0.1);
+
+}
+
+h2{
+text-align:center;
+margin-bottom:5px;
+}
+
+.description{
+text-align:center;
+color:#666;
+margin-bottom:20px;
+}
+
+.controls{
+text-align:center;
+margin-bottom:15px;
+}
+
+select{
+padding:10px;
+font-size:15px;
+margin:5px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+.chartTitle{
+
+text-align:center;
+font-size:18px;
+font-weight:bold;
+margin-top:10px;
+color:#333;
+
+}
+
+canvas{
+margin-top:10px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="section">
+
+<h2>UP Lekhpal Paper-wise Topic Weightage</h2>
+
+<p class="description">
+Select a paper to view section-wise question distribution.
+On mobile, pie chart shows <b>Top topics + Others</b>.
+</p>
+
+
+<div class="controls">
+
+
+<select id="paperSelect" onchange="updateChart()">
+
+<option value="total">Combined Total</option>
+
+<option value="2022">UP Lekhpal Mains 2022</option>
+
+<option value="2015_1">UPSSSC Lekhpal 2015 Shift 1</option>
+
+<option value="2015_2">UPSSSC Lekhpal 2015 Shift 2</option>
+
+</select>
+
+
+
+<select id="chartType" onchange="updateChart()">
+
+<option value="pie">Pie Chart</option>
+
+<option value="bar">Bar Graph</option>
+
+</select>
+
+
+</div>
+
+
+<div class="chartTitle" id="chartTitle"></div>
+
+
+<canvas id="chartCanvas"></canvas>
+
+
+
+</div>
+
+
+
+<script>
+
+
+const subjects=[
+
+"Agriculture",
+"Computer",
+"Current Affairs",
+"Data Interpretation",
+"General Knowledge",
+"General Science",
+"People Dev & Env",
+"Physics",
+"Quantitative Aptitude",
+"Hindi"
+
+];
+
+
+
+const paperNames={
+
+"total":"Combined Total",
+
+"2022":"UP Lekhpal Mains 2022",
+
+"2015_1":"UPSSSC Lekhpal 2015 Shift 1",
+
+"2015_2":"UPSSSC Lekhpal 2015 Shift 2"
+
+};
+
+
+
+const dataSet={
+
+"2022":[8,1,16,5,25,0,0,0,20,25],
+
+"2015_1":[3,0,1,0,40,4,1,1,25,25],
+
+"2015_2":[12,0,4,0,29,4,0,1,25,25],
+
+"total":[23,1,21,5,94,8,1,2,70,75]
+
+};
+
+
+
+const colors=[
+
+"#4CAF50",
+"#2196F3",
+"#FF9800",
+"#9C27B0",
+"#E91E63",
+"#009688",
+"#795548",
+"#607D8B",
+"#3F51B5",
+"#F44336"
+
+];
+
+
+let chart;
+
+
+
+// Mobile Pie Optimization
+
+
+function mobileFormat(labels,data){
+
+if(window.innerWidth>600){
+return {labels,data};
+}
+
+
+let combined=labels.map((l,i)=>({label:l,value:data[i]}));
+
+combined.sort((a,b)=>b.value-a.value);
+
+
+let top=combined.slice(0,5);
+
+let others=combined.slice(5);
+
+
+let otherTotal=others.reduce((s,x)=>s+x.value,0);
+
+
+let newLabels=top.map(x=>x.label);
+
+let newData=top.map(x=>x.value);
+
+
+newLabels.push("Others");
+newData.push(otherTotal);
+
+
+return {labels:newLabels,data:newData};
+
+}
+
+
+
+// Create Chart
+
+
+function createChart(type,labels,data,total,paperName){
+
+if(chart){
+chart.destroy();
+}
+
+
+// Update Title
+
+
+document.getElementById("chartTitle").innerHTML=
+
+paperName+" | "+type.toUpperCase()+" CHART | Total Questions: "+total;
+
+
+
+chart=new Chart(document.getElementById("chartCanvas"),{
+
+type:type,
+
+data:{
+
+labels:labels,
+
+datasets:[{
+
+label:"Questions",
+
+data:data,
+
+backgroundColor:colors
+
+}]
+
+},
+
+options:{
+
+
+plugins:{
+
+legend:{
+position:'bottom'
+},
+
+tooltip:{
+
+callbacks:{
+
+label:function(context){
+
+let total=context.dataset.data.reduce((a,b)=>a+b,0);
+
+let value=context.raw;
+
+let percent=(value/total*100).toFixed(1);
+
+return context.label+" : "+value+" ("+percent+"%)";
+
+}
+
+}
+
+}
+
+},
+
+
+scales:type=="bar" ? {
+
+y:{
+beginAtZero:true,
+title:{
+display:true,
+text:"Number of Questions"
+}
+}
+
+}: {}
+
+
+
+}
+
+});
+
+
+}
+
+
+
+// Update Chart
+
+
+function updateChart(){
+
+
+let paper=document.getElementById("paperSelect").value;
+
+let type=document.getElementById("chartType").value;
+
+
+let data=dataSet[paper];
+
+let labels=subjects;
+
+
+// Calculate Total
+
+
+let total=data.reduce((a,b)=>a+b,0);
+
+
+// Pie Mobile Optimization
+
+
+if(type=="pie"){
+
+let formatted=mobileFormat(labels,data);
+
+labels=formatted.labels;
+
+data=formatted.data;
+
+}
+
+
+createChart(type,labels,data,total,paperNames[paper]);
+
+
+}
+
+
+updateChart();
+
+
+</script>
+
+
+
+</body>
+</html>
+
